@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Evolution of Control Systems</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f17;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .glow-blue {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.25);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+        }
+        .glow-amber {
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+        }
+        .glow-purple {
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.25);
+        }
+        .slide-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        canvas {
+            background: #0d131f;
+            border-radius: 0.75rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
+
+    <!-- Header / Navigation Bar -->
+    <header class="max-w-7xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-gray-800 pb-4 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="p-2.5 bg-blue-600/20 rounded-xl border border-blue-500/30 text-blue-400">
+                <i class="fa-solid fa-microchip text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-emerald-400 to-purple-400">
+                    The Evolution of Control Systems
+                </h1>
+                <p class="text-xs text-gray-400 font-mono">Dynamic Analysis & Feedback Architecture</p>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex items-center gap-1.5 bg-gray-900/80 p-1.5 rounded-xl border border-gray-800 text-xs font-mono">
+            <button onclick="goToSlide(0)" id="tab-0" class="px-3 py-1.5 rounded-lg transition text-white bg-blue-600 font-bold">1. Human</button>
+            <button onclick="goToSlide(1)" id="tab-1" class="px-3 py-1.5 rounded-lg transition text-gray-400 hover:text-white">2. PID</button>
+            <button onclick="goToSlide(2)" id="tab-2" class="px-3 py-1.5 rounded-lg transition text-gray-400 hover:text-white">3. LQR</button>
+            <button onclick="goToSlide(3)" id="tab-3" class="px-3 py-1.5 rounded-lg transition text-gray-400 hover:text-white">4. RL / AI</button>
+            <button onclick="goToSlide(4)" id="tab-4" class="px-3 py-1.5 rounded-lg transition text-gray-400 hover:text-white">5. Summary</button>
+        </nav>
+    </header>
+
+    <!-- Main Presentation Workspace -->
+    <main class="max-w-7xl w-full mx-auto flex-1 flex flex-col justify-center my-2">
+
+        <!-- SLIDE 1: MANUAL CONTROL -->
+        <div id="slide-0" class="slide-card grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div class="space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono uppercase tracking-wider">
+                    <i class="fa-solid fa-user"></i> Stage 01 • Manual Override
+                </div>
+                <h2 class="text-3xl lg:text-5xl font-black text-red-400 tracking-tight">
+                    Human Operator Control
+                </h2>
+                <div class="bg-gray-900/90 border-l-4 border-red-500 p-4 rounded-r-xl">
+                    <p class="text-xs uppercase tracking-widest text-gray-400 font-mono mb-1">Operational Mode</p>
+                    <p class="text-lg font-semibold text-red-200">"Reactive heuristic adjustments with high phase lag."</p>
+                </div>
+                <p class="text-gray-300 text-sm md:text-base leading-relaxed">
+                    Relies on human perception and manual intervention. Susceptible to variable latency, overcorrection, and high overshoot during dynamic setpoint disturbances.
+                </p>
+
+                <div class="pt-2">
+                    <button onclick="triggerOvercorrect()" class="px-5 py-2.5 bg-red-600/30 hover:bg-red-600/50 text-red-200 border border-red-500/50 rounded-xl font-mono text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Trigger Manual Overcorrection
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl glow-red">
+                <div class="flex justify-between items-center mb-2 font-mono text-xs text-gray-400">
+                    <span>Dynamic Response Simulation</span>
+                    <span id="human-status" class="text-red-400 font-bold">Unstable Response</span>
+                </div>
+                <canvas id="canvas-human" class="w-full h-64 md:h-80"></canvas>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: PID CONTROL -->
+        <div id="slide-1" class="slide-card hidden grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div class="space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-mono uppercase tracking-wider">
+                    <i class="fa-solid fa-sliders"></i> Stage 02 • Classical Feedback
+                </div>
+                <h2 class="text-3xl lg:text-5xl font-black text-blue-400 tracking-tight">
+                    PID Controller
+                </h2>
+                <div class="bg-gray-900/90 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                    <p class="text-xs uppercase tracking-widest text-gray-400 font-mono mb-1">Operational Mode</p>
+                    <p class="text-lg font-semibold text-blue-200">"Proportional-Integral-Derivative error loop optimization."</p>
+                </div>
+                <p class="text-gray-300 text-sm md:text-base leading-relaxed">
+                    Continuously calculates error values as the difference between a desired setpoint and a measured process variable, applying corrections based on proportional, integral, and derivative terms.
+                </p>
+
+                <div class="space-y-3 bg-gray-900 p-4 rounded-xl border border-gray-800 font-mono text-xs">
+                    <div class="flex justify-between items-center">
+                        <label class="text-blue-400">Proportional Gain (Kp): <span id="kp-val">2.0</span></label>
+                        <input type="range" min="0.1" max="5.0" step="0.1" value="2.0" id="kp-slider" class="w-1/2" oninput="updatePIDParams()">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <label class="text-emerald-400">Integral Gain (Ki): <span id="ki-val">0.5</span></label>
+                        <input type="range" min="0.0" max="2.0" step="0.05" value="0.5" id="ki-slider" class="w-1/2" oninput="updatePIDParams()">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <label class="text-purple-400">Derivative Gain (Kd): <span id="kd-val">1.0</span></label>
+                        <input type="range" min="0.0" max="3.0" step="0.1" value="1.0" id="kd-slider" class="w-1/2" oninput="updatePIDParams()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl glow-blue">
+                <div class="flex justify-between items-center mb-2 font-mono text-xs text-gray-400">
+                    <span>Step Response Output</span>
+                    <span class="text-blue-400 font-bold">Closed-Loop Active</span>
+                </div>
+                <canvas id="canvas-pid" class="w-full h-64 md:h-80"></canvas>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: LQR CONTROL -->
+        <div id="slide-2" class="slide-card hidden grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div class="space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono uppercase tracking-wider">
+                    <i class="fa-solid fa-square-root-variable"></i> Stage 03 • Optimal State Space
+                </div>
+                <h2 class="text-3xl lg:text-5xl font-black text-emerald-400 tracking-tight">
+                    Linear Quadratic Regulator
+                </h2>
+                <div class="bg-gray-900/90 border-l-4 border-emerald-500 p-4 rounded-r-xl">
+                    <p class="text-xs uppercase tracking-widest text-gray-400 font-mono mb-1">Operational Mode</p>
+                    <p class="text-lg font-semibold text-emerald-200">"Mathematical minimization of state error and control effort."</p>
+                </div>
+                <p class="text-gray-300 text-sm md:text-base leading-relaxed">
+                    Uses a full state-space physical model to derive optimal state feedback gains by solving the Algebraic Riccati Equation, balancing quadratic state costs against actuation expenditure.
+                </p>
+
+                <div class="pt-2">
+                    <button onclick="applyLQRDisturbance()" class="px-5 py-2.5 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-500/50 rounded-xl font-mono text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-bolt"></i> Apply Impulse Disturbance
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl glow-emerald">
+                <div class="flex justify-between items-center mb-2 font-mono text-xs text-gray-400">
+                    <span>Inverted Pendulum Stabilization</span>
+                    <span class="text-emerald-400 font-bold">State Optimal</span>
+                </div>
+                <canvas id="canvas-lqr" class="w-full h-64 md:h-80"></canvas>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: REINFORCEMENT LEARNING -->
+        <div id="slide-3" class="slide-card hidden grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div class="space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-mono uppercase tracking-wider">
+                    <i class="fa-solid fa-brain"></i> Stage 04 • Adaptive Policy
+                </div>
+                <h2 class="text-3xl lg:text-5xl font-black text-purple-400 tracking-tight">
+                    Reinforcement Learning
+                </h2>
+                <div class="bg-gray-900/90 border-l-4 border-purple-500 p-4 rounded-r-xl">
+                    <p class="text-xs uppercase tracking-widest text-gray-400 font-mono mb-1">Operational Mode</p>
+                    <p class="text-lg font-semibold text-purple-200">"Model-free deep policy optimization."</p>
+                </div>
+                <p class="text-gray-300 text-sm md:text-base leading-relaxed">
+                    Optimizes non-linear robotic trajectories through multi-agent simulation learning, mapping high-dimensional state vectors directly to control forces without requiring explicit structural dynamics formulations.
+                </p>
+
+                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 font-mono text-xs flex justify-between items-center">
+                    <div>
+                        <span class="text-gray-400">Training Iterations:</span>
+                        <span id="rl-episodes" class="text-purple-400 font-bold ml-2">1,240,000</span>
+                    </div>
+                    <div class="text-emerald-400 font-bold">
+                        Policy Converged <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl glow-purple">
+                <div class="flex justify-between items-center mb-2 font-mono text-xs text-gray-400">
+                    <span>Robotic Kinematic Trajectory</span>
+                    <span class="text-purple-400 font-bold">Neural Policy Active</span>
+                </div>
+                <canvas id="canvas-rl" class="w-full h-64 md:h-80"></canvas>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: COMPARATIVE SUMMARY -->
+        <div id="slide-4" class="slide-card hidden space-y-6">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <h2 class="text-3xl font-black text-white">System Methodology Matrix</h2>
+                <p class="text-sm text-gray-400 font-mono">Performance evaluation across architecture criteria</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left font-mono text-xs border-collapse bg-gray-900 rounded-xl overflow-hidden border border-gray-800">
+                    <thead>
+                        <tr class="bg-gray-800/80 text-gray-300 border-b border-gray-700">
+                            <th class="p-3.5">Methodology</th>
+                            <th class="p-3.5">System Model</th>
+                            <th class="p-3.5">Non-Linearity Handling</th>
+                            <th class="p-3.5">Implementation Complexity</th>
+                            <th class="p-3.5">Optimal Bounds</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800 text-gray-300">
+                        <tr class="hover:bg-gray-800/40">
+                            <td class="p-3.5 font-bold text-red-400">Human Operator</td>
+                            <td class="p-3.5">None (Intuitive)</td>
+                            <td class="p-3.5 text-yellow-400">Moderate</td>
+                            <td class="p-3.5 text-emerald-400">Low</td>
+                            <td class="p-3.5 text-red-400">Sub-Optimal</td>
+                        </tr>
+                        <tr class="hover:bg-gray-800/40">
+                            <td class="p-3.5 font-bold text-blue-400">PID Controller</td>
+                            <td class="p-3.5">Single Output Error</td>
+                            <td class="p-3.5 text-red-400">Poor</td>
+                            <td class="p-3.5 text-emerald-400">Low</td>
+                            <td class="p-3.5 text-blue-400">Local Steady-State</td>
+                        </tr>
+                        <tr class="hover:bg-gray-800/40">
+                            <td class="p-3.5 font-bold text-emerald-400">LQR Regulator</td>
+                            <td class="p-3.5">Linear State-Space</td>
+                            <td class="p-3.5 text-red-400">Poor (Linear Only)</td>
+                            <td class="p-3.5 text-yellow-400">Moderate</td>
+                            <td class="p-3.5 text-emerald-400">Global Linear Optimal</td>
+                        </tr>
+                        <tr class="hover:bg-gray-800/40">
+                            <td class="p-3.5 font-bold text-purple-400">Reinforcement Learning</td>
+                            <td class="p-3.5">Data-Driven Policy</td>
+                            <td class="p-3.5 text-emerald-400">Excellent</td>
+                            <td class="p-3.5 text-red-400">High (Training Compute)</td>
+                            <td class="p-3.5 text-purple-400">High-Dimensional Optimal</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Controls -->
+    <footer class="max-w-7xl w-full mx-auto flex items-center justify-between border-t border-gray-800 pt-4 mt-6">
+        <div class="flex items-center gap-3">
+            <button onclick="prevSlide()" class="px-3.5 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm transition">
+                <i class="fa-solid fa-chevron-left"></i> Prev
+            </button>
+            <button onclick="nextSlide()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-semibold transition">
+                Next <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="text-xs font-mono text-gray-500 hidden sm:block">
+            Slide <span id="slide-num">1</span> of 5
+        </div>
+    </footer>
+
+    <!-- Simulation & Interactivity Script -->
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 5;
+
+        function updateSlideUI() {
+            for (let i = 0; i < totalSlides; i++) {
+                const el = document.getElementById(`slide-${i}`);
+                const tab = document.getElementById(`tab-${i}`);
+                if (i === currentSlide) {
+                    el.classList.remove('hidden');
+                    tab.className = "px-3 py-1.5 rounded-lg transition text-white bg-blue-600 font-bold";
+                } else {
+                    el.classList.add('hidden');
+                    tab.className = "px-3 py-1.5 rounded-lg transition text-gray-400 hover:text-white";
+                }
+            }
+            document.getElementById('slide-num').innerText = currentSlide + 1;
+        }
+
+        function goToSlide(n) { currentSlide = n; updateSlideUI(); }
+        function nextSlide() { currentSlide = (currentSlide + 1) % totalSlides; updateSlideUI(); }
+        function prevSlide() { currentSlide = (currentSlide - 1 + totalSlides) % totalSlides; updateSlideUI(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // --- Canvas Animations ---
+        // 1. Human Canvas
+        let humanErr = 0;
+        function triggerOvercorrect() { humanErr = 80; }
+        
+        function renderHuman() {
+            const canvas = document.getElementById('canvas-human');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            let time = Date.now() * 0.005;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            
+            // Reference line
+            ctx.strokeStyle = '#374151';
+            ctx.beginPath(); ctx.moveTo(0, canvas.height/2); ctx.lineTo(canvas.width, canvas.height/2); ctx.stroke();
+
+            // Response line
+            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 3; ctx.beginPath();
+            for(let x=0; x<canvas.width; x++) {
+                let wave = Math.sin(x*0.02 + time) * (20 + humanErr);
+                ctx.lineTo(x, canvas.height/2 + wave);
+            }
+            ctx.stroke();
+            if(humanErr > 0) humanErr *= 0.98;
+            requestAnimationFrame(renderHuman);
+        }
+
+        // 2. PID Canvas
+        let Kp = 2.0, Ki = 0.5, Kd = 1.0;
+        function updatePIDParams() {
+            Kp = parseFloat(document.getElementById('kp-slider').value);
+            Ki = parseFloat(document.getElementById('ki-slider').value);
+            Kd = parseFloat(document.getElementById('kd-slider').value);
+            document.getElementById('kp-val').innerText = Kp;
+            document.getElementById('ki-val').innerText = Ki;
+            document.getElementById('kd-val').innerText = Kd;
+        }
+
+        function renderPID() {
+            const canvas = document.getElementById('canvas-pid');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            
+            // Setpoint line
+            ctx.strokeStyle = '#10b981'; ctx.setLineDash([5,5]); ctx.beginPath();
+            ctx.moveTo(0, canvas.height*0.3); ctx.lineTo(canvas.width, canvas.height*0.3); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Step response model
+            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 3; ctx.beginPath();
+            for(let x=0; x<canvas.width; x++) {
+                let t = x * 0.02;
+                let y = canvas.height*0.8 - (1 - Math.exp(-t*Kp) * Math.cos(t*Kd*2)) * (canvas.height*0.5);
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            requestAnimationFrame(renderPID);
+        }
+
+        // 3. LQR Canvas
+        let poleAngle = 0.4;
+        function applyLQRDisturbance() { poleAngle = 0.6; }
+
+        function renderLQR() {
+            const canvas = document.getElementById('canvas-lqr');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            
+            // LQR stabilization step
+            poleAngle *= 0.92;
+
+            let cartX = canvas.width/2;
+            let cartY = canvas.height * 0.7;
+
+            // Cart
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(cartX - 40, cartY - 20, 80, 40);
+
+            // Pole
+            let poleLen = 100;
+            let px = cartX + Math.sin(poleAngle) * poleLen;
+            let py = cartY - Math.cos(poleAngle) * poleLen;
+
+            ctx.strokeStyle = '#34d399'; ctx.lineWidth = 6; ctx.beginPath();
+            ctx.moveTo(cartX, cartY); ctx.lineTo(px, py); ctx.stroke();
+
+            requestAnimationFrame(renderLQR);
+        }
+
+        // 4. RL Canvas
+        function renderRL() {
+            const canvas = document.getElementById('canvas-rl');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            let time = Date.now() * 0.003;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+
+            // Animated Robot Arm
+            let baseXs = canvas.width/2;
+            let baseYs = canvas.height * 0.8;
+            
+            let arm1X = baseXs + Math.cos(time) * 60;
+            let arm1Y = baseYs - 60 + Math.sin(time*2) * 20;
+
+            let arm2X = arm1X + Math.sin(time) * 50;
+            let arm2Y = arm1Y - 40;
+
+            ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 8; ctx.beginPath();
+            ctx.moveTo(baseXs, baseYs); ctx.lineTo(arm1X, arm1Y); ctx.lineTo(arm2X, arm2Y); ctx.stroke();
+
+            // End effector trajectory target
+            ctx.fillStyle = '#c084fc'; ctx.beginPath(); ctx.arc(arm2X, arm2Y, 8, 0, Math.PI*2); ctx.fill();
+
+            requestAnimationFrame(renderRL);
+        }
+
+        window.onload = function() {
+            renderHuman();
+            renderPID();
+            renderLQR();
+            renderRL();
+        };
+    </script>
+</body>
+</html>
